@@ -1,6 +1,9 @@
 import sys									# System calls
 import os
-sys.path.append("../ui/")							# Append the ui folder to path
+script_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(script_dir+"/ui")
+sys.path.append(script_dir+"/src")
+sys.path.append(script_dir+"/lib")						# Append the ui folder to path
 from PyQt4 import QtGui								# Import PyQt module
 import MainWindow								# MainWindow Widget from ui folder
 import model									# Model of commander
@@ -95,12 +98,21 @@ class Application(QtGui.QMainWindow, MainWindow.Ui_MainWindow):
         selected_row = self.tableWidget.currentRow()
 	selected_command = self.tableWidget.item(selected_row, 0)
  	selected_number  = self.tableWidget.item(selected_row, 1)
-  	command = str(selected_command.text())
+  	try:
+       		command = str(selected_command.text())
+        except AttributeError:
+            	self.toConsole("Error: No command selected. Please select a command from the table")
+             	return
    	number  = int(str(selected_number.text()))
   	selected_number.setText(str(number + 1))
  	command = str(selected_command.text())
-  	new_data = self.control.take_a_snapshot()
-	self.control.teach_command(command, str(number+1), new_data)
+  	while True:
+       		new_data = self.control.take_a_snapshot()
+         	if len(new_data) != 0:
+			self.control.teach_command(command, str(number+1), new_data)
+   			break
+   		else:
+         		continue
  	return
 
     def TeachModel(self):
